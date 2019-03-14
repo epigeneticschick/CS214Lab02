@@ -1,0 +1,97 @@
+Script started on Fri 08 Feb 2019 10:07:00 AM EST
+llw5@gold16:~/cs214/lab02$ cat eca  xample6.lex example6.y
+%{
+#include <stdio.h>
+#include "example6.tab.h"
+%}
+%%
+[0-9]+                  return NUMBER;
+heat                    return TOKHEAT;
+on|off                  return STATE;
+set                     return TOKSET;
+temperature             return TOKTEMPERATURE;
+humidity		return TOKHUMIDITY;
+\n                      /* ignore end of line */;
+[ \t]+                  /* ignore whitespace */;
+%%
+
+%{
+#include <stdio.h>
+#include <string.h>
+
+/* declarations */
+int yylex (void);
+void yyerror (char const *);
+int yyparse(void);
+
+/* definitions */ 
+void yyerror(const char *str) {
+        fprintf(stderr,"error: %s\n",str);
+}
+ 
+int yywrap() {
+        return 1;
+} 
+ 
+int main() {
+        yyparse();
+} 
+
+%}
+
+%token NUMBER TOKHEAT STATE TOKSET TOKTEMPERATURE TOKHUMIDITY
+%%
+commands: /* empty */
+        | commands command
+        ;
+
+command:
+        heat_switch
+        | temperature_set
+	| humidity_set
+        ;
+
+heat_switch:
+        TOKHEAT STATE
+        {
+                printf("\tHeat turned on or off\n");
+        }
+        ;
+
+temperature_set:
+        TOKSET TOKTEMPERATURE NUMBER
+        {
+                printf("\tTemperature set\n");
+        }
+        ;
+
+humidity_set:
+	TOKSET TOKHUMIDITY NUMBER
+	{
+		printf("\tHumidity set\n");
+	}
+	;
+
+llw5@gold16:~/cs214/lab02$ make clean
+rm -f lex.yy.c *.tab.h *.tab.c example6
+llw5@gold16:~/cs214/lab02$ ./example6
+bash: ./example6: No such file or directory
+llw5@gold16:~/cs214/lab02$ flex example6.lex
+llw5@gold16:~/cs214/lab02$ bison -d example6.y
+llw5@gold16:~/cs214/lab02$ gcc lex.yy.c example6.tab.c -o example6
+llw5@gold16:~/cs214/lab02$ ./example6
+set humidity to 45
+to	Humidity set
+set temperature to 100
+to	Temperature set
+turn heat off
+turn	Heat turned on or off
+off
+error: syntax error
+llw5@gold16:~/cs214/lab02$ a2ps script
+a2ps: cannot open file `script': No such file or directory
+[script (unprintable): ignored]
+[No output produced]
+llw5@gold16:~/cs214/lab02$ exit
+
+Script done on Fri 08 Feb 2019 10:12:16 AM EST
